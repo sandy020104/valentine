@@ -1,1 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Select your Valentine 💘</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial; margin:0; background:#fff5f8; color:#222;}
+    .wrap{max-width:900px; margin:0 auto; padding:28px 16px 40px;}
+    h1{margin:0 0 6px; font-size:28px;}
+    p{margin:0 0 18px; opacity:.85}
+    .grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px;}
+    .tile{position:relative; border-radius:16px; overflow:hidden; background:#fff; box-shadow:0 6px 18px rgba(0,0,0,.08); cursor:pointer; aspect-ratio:1/1;}
+    .tile img{width:100%; height:100%; object-fit:cover; display:block;}
+    .tile .check{
+      position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+      background:rgba(0,0,0,.35); color:white; font-size:44px; opacity:0; transition:.15s;
+    }
+    .tile.selected .check{opacity:1}
+    .bar{display:flex; gap:10px; align-items:center; margin-top:16px;}
+    .pill{background:white; padding:10px 12px; border-radius:999px; box-shadow:0 6px 18px rgba(0,0,0,.08);}
+    button{
+      border:0; border-radius:999px; padding:10px 14px; font-weight:600; cursor:pointer;
+      box-shadow:0 6px 18px rgba(0,0,0,.10);
+    }
+    button:disabled{opacity:.5; cursor:not-allowed;}
+    .hint{margin-top:10px; font-size:14px; opacity:.75}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Select your Valentine 💘</h1>
+    <p>Tap the correct pictures to continue.</p>
+
+    <div class="grid" id="grid"></div>
+
+    <div class="bar">
+      <div class="pill" id="status">Selected: 0</div>
+      <button id="verify" disabled>Verify</button>
+      <button id="reset" type="button">Reset</button>
+    </div>
+
+    <div class="hint">Tip: you can make the “correct” images be things that reference you two (your city, your pet, a pizza place, etc.).</div>
+  </div>
+
+<script>
+  // ---- EDIT THESE ----
+  // Put your images in the repo, e.g. /img/1.jpg etc.
+  const tiles = [
+    {src:"img/1.jpg", correct:false},
+    {src:"img/2.jpg", correct:true},
+    {src:"img/3.jpg", correct:false},
+    {src:"img/4.jpg", correct:true},
+    {src:"img/5.jpg", correct:false},
+    {src:"img/6.jpg", correct:false},
+    {src:"img/7.jpg", correct:true},
+    {src:"img/8.jpg", correct:false},
+    {src:"img/9.jpg", correct:false},
+  ];
+
+  // Where to go after successful selection:
+  // - can be another page you create: "surprise.html"
+  // - or a direct image file: "final.jpg"
+  const successUrl = "surprise.html";
+
+  // Must select EXACTLY these many correct tiles (recommended)
+  const requiredCorrectCount = tiles.filter(t => t.correct).length;
+
+  // ---- APP ----
+  const grid = document.getElementById("grid");
+  const status = document.getElementById("status");
+  const verify = document.getElementById("verify");
+  const reset = document.getElementById("reset");
+
+  const selected = new Set();
+
+  function render(){
+    grid.innerHTML = "";
+    tiles.forEach((t, i) => {
+      const div = document.createElement("div");
+      div.className = "tile" + (selected.has(i) ? " selected" : "");
+      div.innerHTML = `<img src="${t.src}" alt="tile ${i+1}"><div class="check">✓</div>`;
+      div.onclick = () => {
+        if (selected.has(i)) selected.delete(i); else selected.add(i);
+        update();
+      };
+      grid.appendChild(div);
+    });
+  }
+
+  function update(){
+    status.textContent = `Selected: ${selected.size}`;
+    verify.disabled = selected.size === 0;
+    render();
+  }
+
+  function isWin(){
+    // Win if selected set matches all correct tiles and nothing else
+    const correctIdx = tiles.map((t, i) => t.correct ? i : null).filter(x => x !== null);
+    if (selected.size !== requiredCorrectCount) return false;
+    return correctIdx.every(i => selected.has(i));
+  }
+
+  verify.onclick = () => {
+    if (isWin()) {
+      window.location.href = successUrl;
+    } else {
+      alert("Not quite 😄 Try again!");
+    }
+  };
+
+  reset.onclick = () => { selected.clear(); update(); };
+
+  update();
+</script>
+</body>
+</html>
 
